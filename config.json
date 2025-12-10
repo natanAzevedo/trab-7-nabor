@@ -1,14 +1,14 @@
 {
   "num_nodes": 6,
   "min_neighbors": 2,
-  "max_neighbors": 4,
+  "max_neighbors": 3,
   "resources": {
-    "n1": ["video_a.mp4", "doc_1.pdf"],
-    "n2": ["imagem_festa.jpg"],
-    "n3": ["musica_rock.mp3", "doc_2.pdf"],
-    "n4": ["video_b.mp4"],
-    "n5": ["setup_install.exe", "readme.txt"],
-    "n6": ["archive.zip"]
+    "n1": ["r1"],
+    "n2": ["r2"],
+    "n3": ["r3"],
+    "n4": ["r4"],
+    "n5": ["r5"],
+    "n6": ["r6"]
   },
   "edges": [
     ["n1", "n2"],
