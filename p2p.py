@@ -2,11 +2,12 @@ import json
 import sys
 import random
 import time
+import os
 from collections import deque, defaultdict
 from typing import Dict, Set, List, Tuple, Optional
 import networkx as nx
 import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
+from matplotlib.animation import FuncAnimation, PillowWriter
 
 
 class Node:
@@ -175,7 +176,8 @@ class P2PNetwork:
             # Cores dos nós
             node_colors = []
             for n in G.nodes():
-                if found and n == current_path[-1]:
+                # Protege o acesso a current_path[-1]
+                if found and current_path and n == current_path[-1]:
                     node_colors.append('green')  # Nó que possui o recurso
                 elif n == node_id:
                     node_colors.append('orange')  # Nó inicial
@@ -193,9 +195,11 @@ class P2PNetwork:
             
             # Desenha o caminho atual em vermelho
             if len(current_path) > 1:
-                path_edges = [(current_path[i], current_path[i+1]) 
-                             for i in range(len(current_path)-1) 
-                             if current_path[i+1] in G[current_path[i]]]
+                path_edges = [
+                    (current_path[i], current_path[i+1])
+                    for i in range(len(current_path)-1)
+                    if G.has_edge(current_path[i], current_path[i+1])
+                ]
                 nx.draw_networkx_edges(G, pos, edgelist=path_edges, 
                                       edge_color='red', width=3, ax=ax)
             
@@ -214,12 +218,24 @@ class P2PNetwork:
             ax.axis('off')
         
         anim = FuncAnimation(fig, update, frames=len(search_steps), 
-                           interval=800, repeat=True)
+                   interval=800, repeat=False, blit=False)
         
         if save_path:
-            anim.save(save_path, writer='pillow', fps=1)
+            # Garante que o diretório de destino exista
+            save_path = str(save_path)
+            parent = os.path.dirname(save_path)
+            if parent and not os.path.exists(parent):
+                os.makedirs(parent, exist_ok=True)
+
+            # Se não tiver extensão conhecida, assume .gif
+            if not save_path.lower().endswith(('.gif', '.mp4', '.avi')):
+                save_path = save_path + '.gif'
+
+            # Salva usando PillowWriter para compatibilidade no Windows
+            writer = PillowWriter(fps=1)
+            anim.save(save_path, writer=writer, dpi=150)
             print(f"Animação salva em: {save_path}")
-            plt.close()
+            plt.close(fig)
         else:
             plt.show()
         
